@@ -1,0 +1,32 @@
+---
+title: "Dataset_Gapminder"
+author: "Weijian Zhang"
+date: "April 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+gapminder <- read_csv("../Data/gapminder.csv")
+```
+
+## Dataset summary
+
+```{r cars}
+summary(gapminder)
+```
+The dataset contains 41,284 observations and 6 variables: Country, Year, Life, Population, Income, and Region.
+
+```{r} 
+length(unique(gapminder$Country))
+length(unique(gapminder$Year))
+length(unique(gapminder$region))
+```
+There are 197 countries included in the dataset, and time strating from 1800 to 2015.
+At the same time, all cournties are further classifed into 6 regions.
+Following is a list of regions:
+```{r regions}
+unique(gapminder$region)
+```
+

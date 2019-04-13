@@ -1,0 +1,46 @@
+---
+title: "Code Portfolio"
+author: "Weijian Zhang"
+date: "April 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(vcdExtra)
+library(vcd)
+library(ggplot2)
+library(tidyr)
+data("Hospital", package ="vcd")
+```
+
+## Data Summary
+
+```{r Hospital}
+Hospital
+```
+The Hospital data in vcd gives a 3 x 3 table relating the length of stay (in years) of 132 long-term schizophrenic patients in two London mental hospitals with the frequency of visits by family and friends.
+
+
+## Data Analysis
+To find associate between variables, I perform the Chi-Sq test and to find strength of association, I used assocstats().
+```{r chisq test}
+chisq.test(Hospital)
+assocstats(Hospital)
+```
+We can conclude that association is significant because the p-values are less than 0.05 for both likelihood ratio and pearson.
+
+## Analysis Visualization
+Following is an association plot for these data, with visit frequency as the vertical variable.
+```{r assocplot}
+assocplot(Hospital)
+```
+From the above plot, most regular visits last for 2-9 days, and some last for 10-19 days, while less will last for 20+ days.
+From frequency aspect, most visits are regular.
+
+##  Extra test to verify conclusion
+Because oth variables can be considered ordinal, so CMHtest () may be useful here.
+```{r cmtest}
+CMHtest(Hospital)
+```
+Since p-values are less than 0.05, therefore, similar conclusion as association plots.

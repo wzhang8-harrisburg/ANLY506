@@ -1,0 +1,175 @@
+---
+title: "Code Portfolio"
+author: "Weijian Zhang"
+date: "April 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+getwd()
+library(readr)
+library(ggplot2)
+```
+
+Github Link: https://github.com/wzhang8-harrisburg/ANLY506/tree/master/Final_Report
+
+##  1. Questions to answer
+This report is going to identify difference among demographic regions and find out the development of difference over time.  
+According to the data provided, this report will focus on three dimensions: population, income and life expectance.
+
+##  2. Dataset summary
+The dataset: gapminder contains 41,284 observatioins with 6 variables. And the first few observations is sown as below:
+```{r gapminder, message = FALSE}
+gapminder <- read_csv("../Data/gapminder.csv")
+head(gapminder)
+str(gapminder)
+```
+```{r}
+# amount of unique value in country column
+length(unique(gapminder$Country))
+# amount of unique value in year column
+length(unique(gapminder$Year))
+# amount of unique value in region column
+length(unique(gapminder$region))
+# list all value in region column
+unique(gapminder$region)
+```
+Within the dataset, data from 197 conturies are including and time range overall is 216 years. Besides, all coutnries are further classified into 6 regions.
+
+##  3. Dataset cleaning
+From the above summary, invalid values were spotted in the previous step.  
+It is important to clear invalid values from the dataset to reach a meaningful conslusion.
+```{r}
+# count missing value by columns
+colSums(is.na(gapminder))
+```
+There are missing values in both column population and income
+```{r}
+# remove missing values
+gapminder_cleaned <- na.omit(gapminder)
+```
+```{r}
+# check the new dataset, with NAs removed
+head(gapminder_cleaned)
+```
+```{r}
+# check if any missing value remains
+colSums(is.na(gapminder_cleaned))
+```
+There is no more missing values within the dataset.
+
+##  4. Analysis
+### 4.1 Life expectance
+```{r}
+ggplot(gapminder_cleaned, aes(x = Year, y = life, group = Country)) + 
+  geom_point(aes(color = region)) + 
+  ggtitle("Life Expectance by Year, colored by region") + xlab("Year") + ylab("Life Expectance (Years)")
+```
+  
+There are 197 countries in the dataset, it is impossible to put in legend for the above plot.
+From the above plot, it is easy to conclude people are having significantly higher life expectance now than it was 200 years ago.
+Another interesting finding is that, in 1800 and 2000, the gap between countries are less than the gap in 1950.
+One of the possible reason is that, during 50s, some countries have signifcant development in income and technology; and it takes couple decades for such technology to spread all over the world. Therefore, the gap of life expectance among countries is narrowing.
+
+However, there are too many countries, and the plot is not big enough. 
+```{r}
+ggplot(gapminder_cleaned, aes(x = region, y = life, fill = region)) + 
+  geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 45)) + 
+  ggtitle("Life expectance by region") + xlab("Regions") + ylab("Life Expectance (Years)")
+```
+From the above boxplot, Europe & Central Asia is having the highest life expectance in the overall time span, and South Asia and Sub-Saharan Africa are having the lowest life expectance. However, South Asia has a wider box, which mean the difference among countries are having difference life expectance.
+
+### 4.2 Population
+```{r}
+ggplot(gapminder_cleaned, aes(x = Year, y = population, group = Country)) +
+  geom_point(aes(color = region)) + 
+  geom_line(aes(color = region)) + 
+  ggtitle("Population over time by countries, colored by region") + xlab("Year") + ylab("Population")
+```
+  
+There are 197 countries in the dataset, it is impossible to put in legend for the above plot.
+The slope on the plot shows before 1950, global population was growing steadly.
+After 1950, population was growing faster for most of countries, especially for top 3 countries by popluation.
+
+At the same time, the country with largest population is always the largest in population throught out the whole period of dataset.
+So does the seond place, and it is correct for most of time for third place. 
+Therefore, running a sort on population of the last year in the dataset can show top countries with population.
+To find out top countries in population:
+```{r}
+# subset data
+yearSubset = subset(gapminder_cleaned, Year == max(gapminder_cleaned$Year))
+```
+```{r}
+# sort data by population
+head(yearSubset[order(-yearSubset$population), ])
+```
+From the table above, China, India and United States were having most popluation in the world.
+And their population were growing faster than any other countries.
+
+### 4.3 Income
+```{r}
+ggplot(gapminder_cleaned, aes(x = Year, y = income, group = Country)) +
+  geom_point(aes(color = region)) + 
+  ggtitle("Income over time by countries, colored by region") + xlab("Year") + ylab("Income")
+```
+
+There are 197 countries in the dataset, it is impossible to put in legend for the above plot.
+However, from the above plot, it can be found that East Asia & Pacific was having huge income boost.
+And it looks like one country was growing extremely fast from 1950 to 1975, but its income droped after its peak.
+While another country was keep growing in its income, however in a slower pace than the above mentioned country.
+But, since there are too many countries in this plot. We need a subset of data to see if all previous founding is true; and if it is true, which two countries were making miracle.
+```{r}
+# Subseting East Asia & Pacific Regioin
+regionSubset = subset(gapminder_cleaned, region == "East Asia & Pacific")
+# amount of countries in this region
+length(unique(regionSubset$Country))
+```
+
+```{r}
+# count missing value by columns
+colSums(is.na(regionSubset))
+```
+
+```{r}
+ggplot(regionSubset, aes(x = Year, y = income, group = Country)) +
+  geom_point(aes(color = Country)) + 
+  ggtitle("Income over time in East Asia & Pacific, by countries") + xlab("Year") + ylab("Income")
+```
+From the plot above, the previous assumption was proved and those two patent belong two countries respectively.
+```{r}
+ggplot(regionSubset, aes(x = Year, y = income, group = Country)) +
+  geom_point(aes(color = Country)) + 
+  ggtitle("Income over time in East Asia & Pacific, by countries") + xlab("Year") + ylab("Income") + 
+  xlim(1950, max(gapminder_cleaned$Year))
+```
+From the plot above, the patent of income growth for different coutries are more significant.
+```{r}
+# sort data by income in 2015
+regionSubset_2015 = subset(regionSubset, Year == 2015)
+top10CountryList <- regionSubset_2015[order(-regionSubset_2015$income), ]$Country[1:10]
+```
+
+```{r}
+# region subset by country
+regionSubset_Country = subset(regionSubset, Country %in% top10CountryList)
+```
+
+```{r}
+ggplot(regionSubset_Country, aes(x = Year, y = income, group = Country)) +
+  geom_point(aes(color = Country)) + 
+  ggtitle("Top 10 income over time in East Asia & Pacific, by countries") + xlab("Year") + ylab("Income") + 
+  xlim(1950, max(gapminder_cleaned$Year))
+```
+From the plot above, it is obvious that Australia had highest income for most of the time from 1950 to 2015.
+And Singapore grew over Australia and became the highest income among 10 countries.
+
+##  5. Conclusion
+In the past 200 years, the global life expectance, population and income were growing for most countries.
+And the growth is graduately from the big picture. However, details of growth are always varies by region and countries.
+For life expectance, European is always have the highest expectance.
+For population, China and India are always having the most population in the world. 
+For income, the amount was not consistent through out the history. And when zooming into region, different stories may happen.
+Just like Austrlia, it was highest in the region but caught by Singapore at the very ending.
+
